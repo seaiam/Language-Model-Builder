@@ -4,7 +4,7 @@ We use NLTK to build the 4-grams.
 
 To build and test the language models:
 ``` {.}
-$ python3 build_test_LM.py -t input.test.txt -b input.train.txt -t input.predict.txt
+$ python3 build_test_LM.py -b input.train.txt -t input.test.txt -o input.predict.txt
 ```
 Then, to verify the accuracy of the predictions:
 ``` {.}
