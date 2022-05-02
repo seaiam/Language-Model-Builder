@@ -4,22 +4,44 @@ import sys
 import getopt
 from nltk import ngrams
 
+vocFourGram=[]
+vocabulary = []
+vocCount=0
+# This method build the dictionary
+def build_dict(fourGram):
+    dict ={}
+    for i in fourGram:
+        if i in dict:
+            freq = dict.get(i) + 1
+            dict.update({i:freq})
+        else:
+            dict.update({i:1})
+    return dict
+def one_smoothing_and_log_freq(fourGram,dict):
+    global vocFourGram
+    count =len(fourGram)
+    for i in vocFourGram:
+        if i not in dict:
+            dict.update({i:0})
+    for i in dict:
+        freq = dict.get(i) + 1
+        ratio = freq/(count+vocCount)
+        freq = log(ratio,10)
+        dict.update({i:freq})
+    return dict
 def build_LM(in_file):
     #These lists hold all strings in each languages
     indo= []
     malay= []
     tamil= []
-    vocabulary = []
     # we initiate all values of count to 0
     indoCount=0
     malayCount=0
     tamilCount=0
-    vocCount=0
      # These are lists which will hold the 4-grams
     indoFourGram=[]
     malayFourGram=[]
     tamilFourGram=[]
-    vocFourGram=[]
     # These are the dictionnaries which will hold the pair 4-gram: frequency
     indoDict= {}
     malayDict= {}
@@ -28,6 +50,7 @@ def build_LM(in_file):
     print("building language models...")
     #we parse the training file to get all strings of different languages
     with open(in_file) as f:
+        global vocabulary
         for line in f:
             current = line.split(' ',1)
             if current[0] == 'indonesian':
@@ -45,60 +68,21 @@ def build_LM(in_file):
     indoFourGram=list(ngrams(indo,4))
     malayFourGram=list(ngrams(malay,4))
     tamilFourGram=list(ngrams(tamil,4))
+    
+    global vocFourGram
     vocFourGram=list(ngrams(vocabulary,4))
-
-    #this is the count of 4-grams in each language
-    indoCount=len(indoFourGram)
-    malayCount=len(malayFourGram)
-    tamilCount=len(tamilFourGram)
+    global vocCount
     vocCount=len(vocFourGram)
 
     #we now buil the dictionaries for each languages
-    for i in indoFourGram:
-        if i in indoDict:
-            freq = indoDict.get(i) + 1
-            indoDict.update({i:freq})
-        else:
-            indoDict.update({i:1})
-
-    for i in malayFourGram:
-        if i in malayDict:
-            freq = malayDict.get(i) + 1
-            malayDict.update({i:freq})
-        else:
-            malayDict.update({i:1})    
-
-    for i in tamilFourGram:
-        if i in tamilDict:
-            freq = tamilDict.get(i) + 1
-            tamilDict.update({i:freq})
-        else:
-            tamilDict.update({i:1})   
-    # one-smoothing
-    for i in vocFourGram:
-        if i not in indoDict:
-            indoDict.update({i:0})
-        if i not in malayDict :
-            malayDict.update({i:0})
-        if i not in tamilDict:
-            tamilDict.update({i:0})
-            
+    indoDict = build_dict(indoFourGram)
+    malayDict = build_dict(malayFourGram)
+    tamilDict = build_dict(tamilFourGram)
+   
     #we update the frequency to the log value to facilitate later estimations
-    for i in indoDict:
-        freq = indoDict.get(i) + 1
-        ratio = freq/(indoCount+vocCount)
-        freq = log(ratio,10)
-        indoDict.update({i:freq})
-    for i in malayDict:
-        freq = malayDict.get(i) + 1
-        ratio = freq/(malayCount+vocCount)
-        freq = log(ratio,10)
-        malayDict.update({i:freq})
-    for i in tamilDict:
-        freq = tamilDict.get(i) + 1
-        ratio = freq/(tamilCount+vocCount)
-        freq = log(ratio,10)
-        tamilDict.update({i:freq})
+    indoDict=one_smoothing_and_log_freq(indoFourGram,indoDict)
+    malayDict=one_smoothing_and_log_freq(malayFourGram,malayDict)
+    tamilDict=one_smoothing_and_log_freq(tamilFourGram,tamilDict)
 
     print('done building models')
     #we return a list of dictionnaries
