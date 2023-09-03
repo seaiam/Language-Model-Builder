@@ -1,5 +1,5 @@
 
-This python program takes in a file containing stirngs from 3 languages: Tamil, Malaysian and Indonesian. It then builds a language model for each language based on 4-grams.
+This python program takes in a file containing strings from 3 languages: Tamil, Malaysian and Indonesian. It then builds a language model for each language based on 4-grams.
 We use NLTK to build the 4-grams.
 
 To build and test the language models:
